@@ -12,7 +12,7 @@ class MaterieGUI: public QWidget {
 public:
     MaterieGUI(MaterieService& service) : service{ service } {
         initGUI();
-        add_default();
+        add_toate_materiile();
         initConnect();
         
 	}
@@ -52,8 +52,14 @@ private:
             std::string profesorString = profesor.toStdString();
             std::string numeString = nume.toStdString();
             std::string materieString = "("+ numeString + " " + profesorString + " " + oreString + ")";
-            
-            lst->addItem(QString::fromStdString(materieString));
+            try {
+                service.addMaterieService(numeString, profesorString, std::stoi(oreString));
+
+                lst->addItem(QString::fromStdString(materieString));
+            }
+            catch (ValidationException& e) {
+                QMessageBox::information(nullptr, "Eroare!", "Valori invalide!");
+            }
             });
     }
     void loadData() {
@@ -90,7 +96,7 @@ private:
         lyMain->addLayout(stgLy);
 	}
 
-    void add_default() {
+    void add_toate_materiile () {
         vector<Materie> materii = service.primeste_toate_materiile();
         for (auto& it : materii) {
             string nume = it.getNume();
