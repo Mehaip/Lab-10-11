@@ -4,26 +4,38 @@
 #include <qdebug.h>
 #include <vector>
 #include <string>
+#include <Service.h>
 using std::vector;
 using std::string;
 
 class MaterieGUI: public QWidget {
 public:
-	MaterieGUI() {
+    MaterieGUI(MaterieService& service) : service{ service } {
         initGUI();
-        loadData();
+        add_default();
         initConnect();
         
 	}
 
 private:
+    MaterieService& service;
     QListWidget* lst = new QListWidget;
     QPushButton* btnAdd = new QPushButton{ "&Add" };
     QPushButton* btnExit = new QPushButton{ "&Exit" };
     QLineEdit* txtNume = new QLineEdit;
     QLineEdit* txtProfesor = new QLineEdit;
     QLineEdit* txtOre = new QLineEdit;
+
+    ///add default
+
+
+
     void initConnect() {
+
+        ///default
+
+
+
         QObject::connect(btnExit, &QPushButton::clicked, [&]() {
             qDebug() << "Exit button apasat!";
             QMessageBox::information(nullptr, "Exit", "exit button");
@@ -40,6 +52,7 @@ private:
             std::string profesorString = profesor.toStdString();
             std::string numeString = nume.toStdString();
             std::string materieString = "("+ numeString + " " + profesorString + " " + oreString + ")";
+            
             lst->addItem(QString::fromStdString(materieString));
             });
     }
@@ -76,5 +89,17 @@ private:
 
         lyMain->addLayout(stgLy);
 	}
+
+    void add_default() {
+        vector<Materie> materii = service.primeste_toate_materiile();
+        for (auto& it : materii) {
+            string nume = it.getNume();
+            string profesor = it.getProfesor();
+            int ore = it.getOre();
+            string oreSt = std::to_string(ore);
+            string materie_string = "(" + nume + " " + profesor + " " + oreSt + ")";
+            lst->addItem(QString::fromStdString(materie_string));
+        }
+    }
 
 };

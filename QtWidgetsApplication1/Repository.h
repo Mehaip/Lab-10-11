@@ -67,6 +67,7 @@ private:
 	void save_to_file() const;
 public:
 	FileRepository() = default;
+	explicit FileRepository(string fn);
 	~FileRepository() override = default;
 
 	///add materie

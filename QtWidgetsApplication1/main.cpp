@@ -15,7 +15,13 @@ using std::string;
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-    MaterieGUI gui;
+    FileRepository repo;
+    Contract contract;
+    MaterieValidator val;
+    MaterieService service{ repo, val, contract };
+    service.add_default();
+
+    MaterieGUI gui(service);
     gui.show();
     /*
 
