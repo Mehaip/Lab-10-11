@@ -21,6 +21,7 @@ private:
     MaterieService& service;
     QListWidget* lst = new QListWidget;
     QPushButton* btnAdd = new QPushButton{ "&Add" };
+    QPushButton* btnDelete = new QPushButton{ "&Delete" };
     QPushButton* btnExit = new QPushButton{ "&Exit" };
     QLineEdit* txtNume = new QLineEdit;
     QLineEdit* txtProfesor = new QLineEdit;
@@ -61,14 +62,28 @@ private:
                 QMessageBox::information(nullptr, "Eroare!", "Valori invalide!");
             }
             });
-    }
-    void loadData() {
-        vector<string> allMaterii = { "materie1", "materie2", "materie3", "materie4" };
 
-        for (const auto& numeMaterie : allMaterii) {
-            lst->addItem(QString::fromStdString(numeMaterie));
-        }
+        QObject::connect(btnDelete, &QPushButton::clicked, [&]() {
+            auto nume = txtNume->text();
+            auto profesor = txtProfesor->text();
+            std::string profesorString = profesor.toStdString();
+            std::string numeString = nume.toStdString();
+
+            try {
+                int poz = service.get_materie_position(numeString, profesorString);
+                service.delete_materie(numeString, profesorString);
+                QListWidgetItem* item = lst->takeItem(poz);
+                delete item;
+                
+            }
+            catch (std::invalid_argument& e) {
+                QMessageBox::information(nullptr, "Eroare!", "Materia nu exista!");
+            };
+
+
+            });
     }
+
 	void initGUI() {
         QHBoxLayout* lyMain = new QHBoxLayout{};
         setLayout(lyMain);
@@ -88,7 +103,7 @@ private:
         auto lyBtn = new QHBoxLayout{};
 
         lyBtn->addWidget(btnAdd);
-        lyBtn->addWidget(new QPushButton{ "&Sterge" });
+        lyBtn->addWidget(btnDelete);
         lyBtn->addWidget(new QPushButton{ "&Modifica" });
         lyBtn->addWidget(btnExit);
         stgLy->addLayout(lyBtn);
