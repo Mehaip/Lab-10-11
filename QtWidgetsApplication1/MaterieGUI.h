@@ -13,7 +13,7 @@ public:
     MaterieGUI(MaterieService& service) : service{ service } {
         initGUI();
         add_default();
-        initConnect();
+        initConnect();.
         
 	}
 
