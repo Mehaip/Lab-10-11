@@ -8,6 +8,29 @@
 using std::vector;
 using std::string;
 
+class SmallGUI : public QWidget {
+
+public:
+    SmallGUI() {
+        initGUI();
+    }
+    
+private:
+    void initGUI() {
+        QLineEdit* nume = new QLineEdit;
+        QLineEdit* profesor = new QLineEdit;
+        QLineEdit* ore = new QLineEdit;
+        
+        auto formLy = new QFormLayout;
+        setLayout(formLy);
+        formLy->addRow("Nume", nume);
+        formLy->addRow("Profesor", profesor);
+        formLy->addRow("Ore", ore);
+        
+       
+    }
+};
+
 class MaterieGUI: public QWidget {
 public:
     MaterieGUI(MaterieService& service) : service{ service } {
@@ -29,6 +52,9 @@ private:
     QLineEdit* txtNume = new QLineEdit;
     QLineEdit* txtProfesor = new QLineEdit;
     QLineEdit* txtOre = new QLineEdit;
+    QLineEdit* txtNume2 = new QLineEdit;
+    QLineEdit* txtProfesor2 = new QLineEdit;
+    QLineEdit* txtOre2 = new QLineEdit;
 
     ///add default
 
@@ -132,6 +158,11 @@ private:
             }
             }
         );
+        QObject::connect(btnModify, &QPushButton::clicked, [&]() {
+            auto gui = new SmallGUI{};
+            gui->show();
+
+            });
     }
 
 	void initGUI() {
