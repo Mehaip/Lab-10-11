@@ -23,6 +23,9 @@ private:
     QPushButton* btnAdd = new QPushButton{ "&Add" };
     QPushButton* btnDelete = new QPushButton{ "&Delete" };
     QPushButton* btnExit = new QPushButton{ "&Exit" };
+    QPushButton* btnModify = new QPushButton{ "&Modify" };
+    QPushButton* btnSort = new QPushButton{ "&Sort" };
+    QPushButton* btnReset = new QPushButton{ "&Reset" };
     QLineEdit* txtNume = new QLineEdit;
     QLineEdit* txtProfesor = new QLineEdit;
     QLineEdit* txtOre = new QLineEdit;
@@ -40,11 +43,11 @@ private:
         QObject::connect(btnExit, &QPushButton::clicked, [&]() {
             qDebug() << "Exit button apasat!";
             QMessageBox::information(nullptr, "Exit", "exit button");
+
             close();
             });
 
         QObject::connect(btnAdd, &QPushButton::clicked, [&]() {
-            qDebug() << "Add button apasat!";
             auto nume = txtNume->text();
             auto profesor = txtProfesor->text();
             auto ore = txtOre->text();
@@ -53,13 +56,14 @@ private:
             std::string profesorString = profesor.toStdString();
             std::string numeString = nume.toStdString();
             std::string materieString = "("+ numeString + " " + profesorString + " " + oreString + ")";
+            int oreInt = std::stoi(oreString);
             try {
-                service.addMaterieService(numeString, profesorString, std::stoi(oreString));
+                service.addMaterieService(numeString, profesorString, oreInt);
 
                 lst->addItem(QString::fromStdString(materieString));
             }
             catch (ValidationException& e) {
-                QMessageBox::information(nullptr, "Eroare!", "Valori invalide!");
+                QMessageBox::warning(this, "Warning", QString::fromStdString(e.getErrorMessages()));
             }
             });
 
@@ -82,6 +86,52 @@ private:
 
 
             });
+
+        QObject::connect(btnSort, &QPushButton::clicked, [&]() {
+            lst->clear();
+            vector<Materie> lista_sortata = service.sort_func(1);
+            for (auto& it : lista_sortata) {
+                string nume = it.getNume();
+                string profesor = it.getProfesor();
+                int ore = it.getOre();
+                string oreSt = std::to_string(ore);
+                string stringAfisare = "(" + nume + " " + profesor + " " + oreSt + ")";
+                lst->addItem(QString::fromStdString(stringAfisare));
+            }
+ 
+            });
+
+        QObject::connect(btnReset, &QPushButton::clicked, [&]() {
+            lst->clear();
+            add_toate_materiile();
+            });
+
+        QObject::connect(lst, &QListWidget::itemSelectionChanged, [&]() {
+            qDebug() << "Selectie schimbata!";
+            auto sel = lst->selectedItems();
+            if (sel.isEmpty()) {
+                txtNume->setText("");
+                txtProfesor->setText("");
+                txtOre->setText("");
+            }
+            else {
+                auto selItem = sel.at(0);
+                auto nume = selItem->text();
+                auto profesor = selItem->data(Qt::UserRole).toString();
+                int materie_position = service.get_materie_position(nume.toStdString(), profesor.toStdString());
+                vector<Materie> materii = service.primeste_toate_materiile();
+                int ore = materii[materie_position].getOre();
+                string oreSt = std::to_string(ore);
+                txtNume->setText(nume);
+                txtProfesor->setText(profesor);
+                txtOre->setText(QString::fromStdString(oreSt));
+                
+                
+
+
+            }
+            }
+        );
     }
 
 	void initGUI() {
@@ -104,8 +154,10 @@ private:
 
         lyBtn->addWidget(btnAdd);
         lyBtn->addWidget(btnDelete);
-        lyBtn->addWidget(new QPushButton{ "&Modifica" });
+        lyBtn->addWidget(btnModify);
         lyBtn->addWidget(btnExit);
+        lyBtn->addWidget(btnSort);
+        lyBtn->addWidget(btnReset);
         stgLy->addLayout(lyBtn);
 
         lyMain->addLayout(stgLy);
@@ -114,12 +166,9 @@ private:
     void add_toate_materiile () {
         vector<Materie> materii = service.primeste_toate_materiile();
         for (auto& it : materii) {
-            string nume = it.getNume();
-            string profesor = it.getProfesor();
-            int ore = it.getOre();
-            string oreSt = std::to_string(ore);
-            string materie_string = "(" + nume + " " + profesor + " " + oreSt + ")";
-            lst->addItem(QString::fromStdString(materie_string));
+            QListWidgetItem* item = new QListWidgetItem(QString::fromStdString(it.getNume()));
+            item->setData(Qt::UserRole, QString::fromStdString(it.getProfesor()));
+            lst->addItem(item);
         }
     }
 
